@@ -1,0 +1,5 @@
+lf (27) UNRELEASED; urgency=medium
+
+  * Initial debian packaging.
+
+ -- Penn Bauman <me@pennbauman.com>  Tue, 18 Oct 2022 02:40:46 -0500

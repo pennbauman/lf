@@ -1,0 +1,14 @@
+Source: lf
+Maintainer: Penn Bauman <me@pennbauman.com>
+Section: misc
+Priority: optional
+Standards-Version: 4.5.0
+Build-Depends: gccgo-go, debhelper (>= 9)
+
+Package: lf
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: terminal file manager (lf as in "list files")
+ lf (as in "list files") is a terminal file manager written in Go with a
+ heavy inspiration from ranger file manager
+ ! This is a work in progress. Use at your own risk.
