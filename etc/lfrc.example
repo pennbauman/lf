@@ -35,11 +35,10 @@ map O $mimeopen --ask $f
 # This command is called when current file is not a directory. You may want to
 # use either file extensions and/or mime types here. Below uses an editor for
 # text files and a file opener for the rest.
-cmd open ${{
-    test -L $f && f=$(readlink -f $f)
-    case $(file --mime-type $f -b) in
-        text/*) $EDITOR $fx;;
-        *) for f in $fx; do setsid $OPENER $f > /dev/null 2> /dev/null & done;;
+cmd open &{{
+    case $(file --mime-type -Lb $f) in
+        text/*) lf -remote "send $id \$$EDITOR \$fx";;
+        *) for f in $fx; do $OPENER $f > /dev/null 2> /dev/null & done;;
     esac
 }}
 
@@ -60,7 +59,7 @@ cmd trash %set -f; mv $fx ~/.trash
 #     printf "$fx\n"
 #     printf "delete?[y/n]"
 #     read ans
-#     [ $ans = "y" ] && rm -rf $fx
+#     [ "$ans" = "y" ] && rm -rf $fx
 # }}
 
 # use '<delete>' key for either 'trash' or 'delete' command

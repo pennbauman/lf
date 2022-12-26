@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"syscall"
 
 	"golang.org/x/sys/unix"
 )
@@ -63,12 +64,19 @@ func init() {
 
 	u, err := user.Current()
 	if err != nil {
+		// When the user is not in /etc/passwd (for e.g. LDAP) and CGO_ENABLED=1 in go env,
+		// the cgo implementation of user.Current() fails even when HOME and USER are set.
+
 		log.Printf("user: %s", err)
 		if os.Getenv("HOME") == "" {
-			log.Print("$HOME variable is empty or not set")
+			panic("$HOME variable is empty or not set")
 		}
 		if os.Getenv("USER") == "" {
-			log.Print("$USER variable is empty or not set")
+			panic("$USER variable is empty or not set")
+		}
+		u = &user.User{
+			Username: os.Getenv("USER"),
+			HomeDir:  os.Getenv("HOME"),
 		}
 	}
 	gUser = u
@@ -177,7 +185,7 @@ func isHidden(f os.FileInfo, path string, hiddenfiles []string) bool {
 }
 
 func userName(f os.FileInfo) string {
-	if stat, ok := f.Sys().(*unix.Stat_t); ok {
+	if stat, ok := f.Sys().(*syscall.Stat_t); ok {
 		if u, err := user.LookupId(fmt.Sprint(stat.Uid)); err == nil {
 			return fmt.Sprintf("%v ", u.Username)
 		}
@@ -186,7 +194,7 @@ func userName(f os.FileInfo) string {
 }
 
 func groupName(f os.FileInfo) string {
-	if stat, ok := f.Sys().(*unix.Stat_t); ok {
+	if stat, ok := f.Sys().(*syscall.Stat_t); ok {
 		if g, err := user.LookupGroupId(fmt.Sprint(stat.Gid)); err == nil {
 			return fmt.Sprintf("%v ", g.Name)
 		}
@@ -195,7 +203,7 @@ func groupName(f os.FileInfo) string {
 }
 
 func linkCount(f os.FileInfo) string {
-	if stat, ok := f.Sys().(*unix.Stat_t); ok {
+	if stat, ok := f.Sys().(*syscall.Stat_t); ok {
 		return fmt.Sprintf("%v ", stat.Nlink)
 	}
 	return ""
